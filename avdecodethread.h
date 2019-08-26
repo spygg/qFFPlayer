@@ -1,7 +1,7 @@
 #ifndef AVTHREAD_H
 #define AVTHREAD_H
 
-#include "pcmstream.h"
+#include "audioplaythread.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -28,13 +28,13 @@ extern "C"
 #include <QImage>
 #include <QAudioOutput>
 
-class AVThread : public QThread
+class AVDecodeThread : public QThread
 {
     Q_OBJECT
 
 public:
-    AVThread(QObject *parent = nullptr);
-    ~AVThread();
+    AVDecodeThread(QObject *parent = nullptr);
+    ~AVDecodeThread();
 
 public:
     void initAV();
@@ -43,12 +43,13 @@ public:
 signals:
     void updateVideoPic(QImage img);
     void updateAudioData(char*audioBuffer, int out_buffer_size);
+
 private:
     void run();
-    void initializeAudio(const QAudioDeviceInfo &deviceInfo);
 
 private:
     char m_szFilename[255];
+    void startWorkInAThread();
 };
 
 #endif // AVTHREAD_H

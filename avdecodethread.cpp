@@ -1,33 +1,40 @@
-#include "avthread.h"
+#include "avdecodethread.h"
 #include <QDebug>
 
 #define MAX_AUDIO_FRAME_SIZE 192000 // 1 second of 48khz 32bit audio
 
-AVThread::AVThread(QObject *parent):QThread (parent)
+AVDecodeThread::AVDecodeThread(QObject *parent):QThread (parent)
 {
     memset(m_szFilename, 0, sizeof(m_szFilename));
     initAV();
 }
 
-AVThread::~AVThread()
+AVDecodeThread::~AVDecodeThread()
 {
     avformat_network_deinit();
     qDebug() << "thread quit";
 }
 
-void AVThread::initAV()
+void AVDecodeThread::initAV()
 {
     avformat_network_init();
 }
 
-void AVThread::openAV(char *szFileName)
+void AVDecodeThread::openAV(char *szFileName)
 {
     strcpy(m_szFilename, szFileName);
     start();
 }
 
+void AVDecodeThread::startWorkInAThread()
+{
+    AudioPlayThread *workerThread = new AudioPlayThread(this);
 
-void AVThread::run()
+    connect(this, &AVDecodeThread::updateAudioData, workerThread, &AudioPlayThread::updateAudioData);
+    connect(workerThread, &AVDecodeThread::finished, workerThread, &QObject::deleteLater);
+}
+
+void AVDecodeThread::run()
 {
     AVFormatContext *avFormatContext = nullptr;
     AVPacket packet;
@@ -204,16 +211,16 @@ void AVThread::run()
 
 
         //计算一个标准画面的大小
-        yuvBuffer = (unsigned char *)av_malloc(av_image_get_buffer_size(AV_PIX_FMT_YUV420P,
+        yuvBuffer = static_cast<unsigned char *>(av_malloc(av_image_get_buffer_size(AV_PIX_FMT_YUV420P,
                                                                         pVideoCodecContext->width,
                                                                         pVideoCodecContext->height,
-                                                                        1));
+                                                                        1)));
 
-        rgbBuffer = (unsigned char *)av_malloc(av_image_get_buffer_size(AV_PIX_FMT_RGB32,
+        rgbBuffer = static_cast<unsigned char *>(av_malloc(av_image_get_buffer_size(AV_PIX_FMT_RGB32,
                                                                         pVideoCodecContext->width,
                                                                         pVideoCodecContext->height,
                                                                         1
-                                                                        ));
+                                                                        )));
 
         av_image_fill_arrays(pFrameYUV->data,
                              pFrameYUV->linesize,
@@ -243,7 +250,7 @@ void AVThread::run()
 
     while(av_read_frame(avFormatContext, &packet) >= 0){
         if(packet.stream_index == audioStream){
-            msleep(10);
+//            msleep(10);
             int got_frame = 0;
             err = avcodec_decode_audio4( pCodecCtxAudio,
                                          pFrame,
@@ -284,7 +291,7 @@ void AVThread::run()
             while(avcodec_receive_frame(pVideoCodecContext, pFrame) == 0){
 
                 sws_scale(img_convert_ctx,
-                          (const uint8_t* const*)pFrame->data,
+                          pFrame->data,
                           pFrame->linesize,
                           0,
                           pVideoCodecContext->height,
@@ -303,9 +310,9 @@ void AVThread::run()
 
                     //构造QImage，用于主页面显示
                     QImage image((uchar *)pFrameRGB->data[0], iWindowWidth, iWindowHeight,QImage::Format_ARGB32);
-                    QImage imagef = image.copy(); //把图像复制一份 传递给界面显
+//                    QImage imagef = image.copy(); //把图像复制一份 传递给界面显
 
-                    emit updateVideoPic(imagef);
+                    emit updateVideoPic(image);
                 }
 
             }

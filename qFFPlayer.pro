@@ -26,34 +26,23 @@ CONFIG += c++11
 
 
 SOURCES += \
-        avthread.cpp \
+        audioplaythread.cpp \
+        avdecodethread.cpp \
+        avplayer.cpp \
         imagedispaly.cpp \
         main.cpp \
-        mainwindow.cpp \
-        pcmstream.cpp
+        mainwindow.cpp
 
 HEADERS += \
-        avthread.h \
+        audioplaythread.h \
+        avdecodethread.h \
+        avplayer.h \
         imagedispaly.h \
-        mainwindow.h \
-        pcmstream.h
+        mainwindow.h
 
 FORMS += \
         mainwindow.ui
 
-#LIBS += -lavcodec\
-#        -lavdevice \
-#        -lswresample \
-#        -lavformat \
-#        -lavcodec \
-#        -lavutil \
-#        -lswscale  \
-#        -lGL \
-#        -lm \
-#        -lz \
-#        -lpthread \
-#        -lssl \
-#        -lcrypto
 LIBS += -lavformat -lavdevice -lavcodec -lavutil -lpthread -lswscale -lswresample -lz -lssl -lcrypto
 
 # Default rules for deployment.
