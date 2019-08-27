@@ -22,25 +22,18 @@ AudioPlayThread::AudioPlayThread(QObject *parent):
 
 }
 
-void AudioPlayThread::updateAudioData(char *audioBuffer, int out_buffer_size)
+void AudioPlayThread::updateAudioData(QByteArray audio)
 {
-//    memcpy(m_buf + m_index, audioBuffer, out_buffer_size);
-//    m_index += out_buffer_size;
-
+    int out_buffer_size = audio.size();
     if(freeBytes.tryAcquire(out_buffer_size)){
 
-        memcpy(buffer + iCurrentWrite, audioBuffer, out_buffer_size);
+        memcpy(buffer + iCurrentWrite, audio.constData(), out_buffer_size);
         iCurrentWrite += out_buffer_size;
 
         iCurrentWrite = iCurrentWrite % BufferSize;
         usedBytes.release(out_buffer_size);
     }
 
-
-//    buffer[i % BufferSize] = "ACGT"[(int)qrand() % 4];
-
-
-//    m_pcmStream->setData(audioBuffer, out_buffer_size);
 }
 
 void AudioPlayThread::run()
@@ -78,15 +71,7 @@ void AudioPlayThread::run()
 
            --chunks;
         }
-//        int vv = m_audioOutput->bytesFree();
-//        qDebug() << vv << m_index;
-//        if(m_index >= vv){
-//            m_audioOutDevice->write(m_buf, m_index);
-//            m_index = 0;
-//        }
-//        else {
-//            msleep(1);
-//        }
+
     }
 }
 

@@ -27,7 +27,7 @@ CONFIG += c++11
 
 SOURCES += \
         audioplaythread.cpp \
-        avdecodethread.cpp \
+        avdemuxthread.cpp \
         avplayer.cpp \
         imagedispaly.cpp \
         main.cpp \
@@ -35,7 +35,7 @@ SOURCES += \
 
 HEADERS += \
         audioplaythread.h \
-        avdecodethread.h \
+        avdemuxthread.h \
         avplayer.h \
         imagedispaly.h \
         mainwindow.h
@@ -43,7 +43,8 @@ HEADERS += \
 FORMS += \
         mainwindow.ui
 
-LIBS += -lavformat -lavdevice -lavcodec -lavutil -lpthread -lswscale -lswresample -lz -lssl -lcrypto
+unix:
+    LIBS += -lavformat -lavdevice -lavcodec -lavutil -lpthread -lswscale -lswresample -lz -lssl -lcrypto
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

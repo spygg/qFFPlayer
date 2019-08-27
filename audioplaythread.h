@@ -11,7 +11,7 @@ public:
     AudioPlayThread(QObject *parent = nullptr);
 
 public slots:
-    void updateAudioData(char*audioBuffer, int out_buffer_size);
+    void updateAudioData(QByteArray audio);
 
 private:
     QAudioOutput *m_audioOutput;

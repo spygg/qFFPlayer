@@ -1,40 +1,40 @@
-#include "avdecodethread.h"
+#include "avdemuxthread.h"
 #include <QDebug>
 
 #define MAX_AUDIO_FRAME_SIZE 192000 // 1 second of 48khz 32bit audio
 
-AVDecodeThread::AVDecodeThread(QObject *parent):QThread (parent)
+AVDemuxThread::AVDemuxThread(QObject *parent):QThread (parent)
 {
     memset(m_szFilename, 0, sizeof(m_szFilename));
     initAV();
 }
 
-AVDecodeThread::~AVDecodeThread()
+AVDemuxThread::~AVDemuxThread()
 {
     avformat_network_deinit();
     qDebug() << "thread quit";
 }
 
-void AVDecodeThread::initAV()
+void AVDemuxThread::initAV()
 {
     avformat_network_init();
 }
 
-void AVDecodeThread::openAV(char *szFileName)
+void AVDemuxThread::openAV(char *szFileName)
 {
     strcpy(m_szFilename, szFileName);
     start();
 }
 
-void AVDecodeThread::startWorkInAThread()
+void AVDemuxThread::startWorkInAThread()
 {
     AudioPlayThread *workerThread = new AudioPlayThread(this);
 
-    connect(this, &AVDecodeThread::updateAudioData, workerThread, &AudioPlayThread::updateAudioData);
-    connect(workerThread, &AVDecodeThread::finished, workerThread, &QObject::deleteLater);
+    connect(this, &AVDemuxThread::updateAudioData, workerThread, &AudioPlayThread::updateAudioData);
+    connect(workerThread, &AVDemuxThread::finished, workerThread, &QObject::deleteLater);
 }
 
-void AVDecodeThread::run()
+void AVDemuxThread::run()
 {
     AVFormatContext *avFormatContext = nullptr;
     AVPacket packet;
@@ -268,9 +268,10 @@ void AVDecodeThread::run()
                             (const uint8_t **)pFrame->data,
                             pFrame->nb_samples);
 
-                updateAudioData((char*)audioBuffer, out_buffer_size);
-
-//                 m_audioStream->setData((char*)audioBuffer, out_buffer_size);
+                //请注意,这里信号不能使用指针,否则会出错,这个害我排查了一天.....
+                QByteArray audio;
+                audio.append((char*)audioBuffer, out_buffer_size);
+                updateAudioData(audio);
             }
             else{
                 qDebug() << "no audio data";
@@ -286,7 +287,8 @@ void AVDecodeThread::run()
                 qDebug() << "发送视频帧失败!"<<  err;
             }
 
-            msleep(40);
+            //这个延时会导致声音播放卡顿....
+            msleep(4);
             //解码
             while(avcodec_receive_frame(pVideoCodecContext, pFrame) == 0){
 

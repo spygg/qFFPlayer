@@ -2,7 +2,7 @@
 #define AVPLAYER_H
 
 #include <QWidget>
-#include "avdecodethread.h"
+#include "avdemuxthread.h"
 #include "audioplaythread.h"
 #include "imagedispaly.h"
 

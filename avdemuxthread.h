@@ -28,13 +28,13 @@ extern "C"
 #include <QImage>
 #include <QAudioOutput>
 
-class AVDecodeThread : public QThread
+class AVDemuxThread : public QThread
 {
     Q_OBJECT
 
 public:
-    AVDecodeThread(QObject *parent = nullptr);
-    ~AVDecodeThread();
+    AVDemuxThread(QObject *parent = nullptr);
+    ~AVDemuxThread();
 
 public:
     void initAV();
@@ -42,7 +42,7 @@ public:
 
 signals:
     void updateVideoPic(QImage img);
-    void updateAudioData(char*audioBuffer, int out_buffer_size);
+    void updateAudioData(QByteArray audio);
 
 private:
     void run();

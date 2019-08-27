@@ -9,8 +9,8 @@ int main(int argc, char *argv[])
 //    MainWindow w;
     AVPlayer w;
     w.show();
-    w.open("/home/spygg/Downloads/test.mp3");
-//    w.open("/home/spygg/Downloads/download.mp4");
+//    w.open("/home/spygg/Downloads/test.mp3");
+    w.open("/home/spygg/Downloads/download.mp4");
 
 
     return a.exec();

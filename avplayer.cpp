@@ -14,13 +14,13 @@ AVPlayer::AVPlayer(QWidget *parent) :
 
 void AVPlayer::open(char *szFileName)
 {
-    AVDecodeThread *workerThread = new AVDecodeThread(this);
+    AVDemuxThread *workerThread = new AVDemuxThread(this);
     AudioPlayThread *audioThread = new AudioPlayThread(this);
 
-    connect(workerThread, &AVDecodeThread::updateVideoPic, m_displyer, &ImageDispaly::slotGetOneFrame);
-    connect(workerThread, &AVDecodeThread::updateAudioData, audioThread, &AudioPlayThread::updateAudioData);
+    connect(workerThread, &AVDemuxThread::updateVideoPic, m_displyer, &ImageDispaly::slotGetOneFrame);
+    connect(workerThread, &AVDemuxThread::updateAudioData, audioThread, &AudioPlayThread::updateAudioData);
 
-    connect(workerThread, &AVDecodeThread::finished, workerThread, &QObject::deleteLater);
+    connect(workerThread, &AVDemuxThread::finished, workerThread, &QObject::deleteLater);
     connect(audioThread, &AudioPlayThread::finished, audioThread, &QObject::deleteLater);
 
     workerThread->openAV(szFileName);
